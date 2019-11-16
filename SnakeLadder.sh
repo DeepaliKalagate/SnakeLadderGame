@@ -15,6 +15,10 @@ position=0
 steps=0
 snakeLadder=0
 newPosition=0
+counter=0
+
+#Dictionary
+declare -A positionHistory
 
 function ladderSnake()
 {
@@ -30,14 +34,22 @@ function ladderSnake()
 			$LADDER)
 				position=$(( $position + $steps )) ;;
 		esac
-		 if [ $position -gt $WON_POSITION ];
+		
+		if [ $position -gt $WON_POSITION ];
    	then
-			position=$(exactWinPosition $1 $2)
+			counter=$(( $counter + 1 ))
+			positionHistory[$counter]=$position
+			position=$(exactWinPosition $position $steps)
+
+
    	elif [ $position -eq $WON_POSITION ];
    	then
+			echo "You won the game"
       	break
    	fi
 	done
+	echo $counter
+	echo ${positionHistory[@]}
 }
 
 function exactWinPosition()
@@ -47,4 +59,3 @@ function exactWinPosition()
 }
 
 ladderSnake
-
