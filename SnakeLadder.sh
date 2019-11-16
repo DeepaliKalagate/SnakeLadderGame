@@ -3,90 +3,80 @@
 echo "Welcome to Snake Ladder Game"
 
 #Constant Vabiables
-PLAYER_ONE=1
-PLAYER_TWO=2
 INITIAL_POSITION=0
 WON_POSITION=100
 NO_CHANGE=0
 SNAKE=1
 LADDER=2
 
-#Variables
+numberOfDiceRolled=0
 position=0
-steps=0
-snakeLadder=0
-newPosition=0
-counter=0
+chance=0
 
-#Dictionary
-declare -A positionHistory
+declare -a playerOneCounter
+declare -a playerTwoCounter
 
-	function  playingWithTwoPlayer()
-	{
-		while ! [[ $PLAYER_ONE -eq $WON_POSITION || $PLAYER_TWO -eq $WON_POSITION ]]
-      do 
-			for((i=1;i<=2;i++))
-        	do 
-         	if [ $i -eq 1 ]  
-       		then
-           		steps=$((RANDOM%6+1))
-           		diceCount=$(($diceCount + $steps))
-					snakeLadder=$((RANDOM%3))
-    	   		case $snakeLadder in 
-            	$NO_PLAY) 
-               	 echo "No step";;
-          		$SNAKE)
-               	 PLAYER_ONE=$(($PLAYER_ONE -$steps));;
-               $LADDER) 
-               	 PLAYER_ONE=$(($PLAYER_ONE + $steps))
-  						 snakeLadder=$((RANDOM%3))
-               while [ $snakeLadder -eq $LADDER ]
-               do
-             		 PLAYER_ONE=$(($PLAYER_ONE + $steps))
-               	 snakeLadder=$((RANDOM%3))
-               done;;
-               esac
-               if [ $PLAYER_ONE -ge $WON_POSITION ] 
-               then
-               	echo "PLAYER_ONE won"
-                	break
-               fi
-               if [ $PLAYER_ONE -lt $INITIAL_POSITION ] 
-               then
-                	 PLAYER_ONE=$INITIAL_POSITION
-               fi 
-       		fi
-              	if [ $i -eq 2 ]  
-       			then
-           			steps=$((RANDOM%6+1))
-           			diceCount=$(($diceCount + $steps))
-						snakeLadder=$((RANDOM%3))
-    	   		case $snakeLadder in 
-            	$NO_PLAY) 
-           		    echo "No step";;
-          		$SNAKE)
-                	PLAYER_TWO=$(($PLAYER_TWO -$steps));;
-               $LADDER) 
-                	 PLAYER_TWO=$(($PLAYER_TWO + $steps))
-  						 snakeLadder=$((RANDOM%3))
-               	 while [ $snakeLadder -eq $LADDER ]
-               	 do
-               		 PLAYER_TWO=$(($PLAYER_TWO + $steps))
-                		 snakeLadder=$((RANDOM%3))
-                	done;;
-               esac
-               if [ $PLAYER_TWO -ge $WON_POSITION ] 
-               then
-             	   echo "PLAYER_TWO won"
-               	break
-               fi
-               if [ $PLAYER_TWO -lt $INITIAL_POSITION ] 
-               then
-               	PLAYER_TWO=$INITIAL_POSITION
-               fi
-       		fi
- 	   done
-           done
+playerOne=$INITIAL_POSITION
+playerTwo=$INITIAL_POSITION
+
+function playGame()
+{
+
+	steps=$((RANDOM%6+1))
+	numberOfDiceRolled=$(($numberOfDiceRolled+1))
+	snakeLadder=$((RANDOM%3))
+	case $snakeLadder in
+	$NO_PLAY)
+		position=$position
+		chance=$(($chance+1));;
+	$LADDER)
+		position=$(( $position + $steps ));;
+	$SNAKE)
+		position=$(( $position - $steps ))
+		chance=$(($chance+1));;
+	esac
+	checkReachedWin $steps $position
+
 }
 
-playingWithTwoPlayer
+function checkReachedWin()
+{
+	if [ $2 -le $INITIAL_POSITION ]
+	then
+		position=$INITIAL_POSITION
+	elif [ $2 -eq $WON_POSITION ]
+	then
+		position=$WON_POSITION
+	elif [ $2 -gt $WON_POSITION ]
+	then
+		position=$(( $2 - $1 ))
+	fi
+}
+
+#main Porgram starts
+
+while [ $playerOne -lt $WON_POSITION ] && [ $playerTwo -lt $WON_POSITION ]
+do
+	if [ $(($chance%2)) -eq 0 ]
+	then
+		position=$playerOne
+		playGame $position $playerOneCounter
+		playerOneCounter[$numberOfDiceRolled]=$position
+		playerOne=$position
+		if [ $playerOne -eq $WON_POSITION ]
+		then
+			echo "Player one won"
+			break
+		fi
+	else 
+		position=$playerTwo
+		playGame $position $playerTwoCounter
+		playerTwoCounter[$numberOfDiceRolled]=$position
+		playerTwo=$position
+		if [ $playerTwo -eq $WON_POSITION ]
+		then
+			echo "player two won"
+			break
+		fi
+	fi
+done
