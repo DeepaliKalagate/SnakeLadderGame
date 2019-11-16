@@ -14,7 +14,7 @@ LADDER=2
 position=0
 steps=0
 snakeLadder=0
-
+newPosition=0
 
 function ladderSnake()
 {
@@ -30,15 +30,20 @@ function ladderSnake()
 			$LADDER)
 				position=$(( $position + $steps )) ;;
 		esac
-			if [ $position -lt $INITIAL_POSITION ]
-			then
-				position=$INITIAL_POSITION
-			fi
-			if [ $position -eq $WON_POSITION ]
-			then
-				break
-			fi
+		 if [ $position -gt $WON_POSITION ];
+   	then
+			position=$(exactWinPosition $1 $2)
+   	elif [ $position -eq $WON_POSITION ];
+   	then
+      	break
+   	fi
 	done
+}
+
+function exactWinPosition()
+{
+      newPosition=$(( $1 - $2 ))
+      echo $newPosition
 }
 
 ladderSnake
